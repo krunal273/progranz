@@ -1,0 +1,220 @@
+
+            $(document).on("submit", "form", function (e) {
+                e.preventDefault();
+                var functionName = !!$(this).data("function");
+
+                if (functionName !== false) {
+                    functionName = window[$(this).data("function")];
+                    functionName($(this));
+                }
+            });
+
+            $(document).on("keydown", "textarea, input[type=text], input[type=email], input[type=password]", function (event) {
+
+                event.which = event.keyCode ? event.keyCode : event.which;
+
+                if ($.inArray(event.which, [8, 9, 13, 27, 46, 116]) !== -1 ||
+                        (event.which === 65 && event.ctrlKey === true) ||
+                        (event.which === 67 && event.ctrlKey === true) ||
+                        (event.which === 88 && event.ctrlKey === true) ||
+                        (event.which >= 37 && event.which <= 40)) {
+
+                    var val_max = !!$(this).data("max");
+                    if (val_max !== false) {
+                        var length = $(this).val().length;
+                        if (length - 1 < JSON.parse($(this).data("max"))) {
+                            removeValidation($(this), "error");
+                        }
+                    }
+                    // let it happen, don't do anything
+                    return;
+                }
+
+
+                var val_max = !!$(this).data("max");
+                if (val_max !== false) {
+                    var length = $(this).val().length;
+                    if (length >= JSON.parse($(this).data("max"))) {
+                        showValidation($(this), "error", $(this).closest(".form-group").find("label").text() + " should be <= " + JSON.parse($(this).data("max")));
+                        return false;
+                    } else {
+                        removeValidation($(this), "error");
+                    }
+                }
+            });
+
+            $(document).on("change", "input[type=checkbox], input[type=radio]", function (event) {
+                var val_required = !!$(this).data("required");
+                if (val_required !== false) {
+                    if ($(this).prop("checked")) {
+                        removeValidationCheckbox($(this), "error");
+                    }
+                }
+            });
+
+            $(document).on("keyup", "textarea, input[type=text], input[type=email], input[type=password]", function (event) {
+
+//                var val_required = !!$(this).data("required");
+//                if (val_required !== false) {
+//                    var length = $(this).val().length;
+
+//                    if (length > 0 && length_good)
+//                        removeValidation($(this), "error");
+//                    else
+//                        showValidation($(this), "error", $(this).closest(".form-group").find("label").text() + " can't be empty");                        
+//                }
+            });
+
+            $(document).on('show.bs.modal', function () {
+//                console.log($(this).find("form"));
+                clearValidation($(this).find("form"));
+            });
+        });
+
+        function processForm(form) {
+            if (validateForm(form)) {
+                var email = $("#uemail").val();
+                var pass = $("#upass").val();
+                $.ajax({
+                    url: "../admin/query_login.php",
+                    beforeSend: function () {},
+                    data: {
+                        uemail: email,
+                        upass: pass
+                    },
+                    type: "POST",
+                    success: function (response) {
+                        var json_ob = JSON.parse(response);
+                        if (json_ob.type === "success") {
+                            window.location = json_ob.redirect;
+                        } else if (json_ob.type === "danger") {
+                            showAlert(json_ob.type, json_ob.message);
+                        }
+                    },
+                    error: function (response) {
+                        showAlert("danger", "AJAX request problem");
+                    }
+                });
+            }
+        }
+
+        function validateForm(form) {
+            var is_valid = true;
+
+            form.find("input:not(:disabled)").each(function (index, ele) {
+                var val_required = !!$(ele).data("required");
+                if (val_required !== false) {
+                    is_valid &= isNotEmpty($(ele));
+                }
+
+                var val_min = !!$(ele).data("min");
+                if (val_min !== false) {
+                    is_valid &= isValidLength($(ele), $(ele).data("min"), ">=");
+                }
+            });
+
+            return is_valid;
+        }
+
+        function showValidation(ele, type, message) {
+            ele.closest(".form-group").addClass("has-" + type);
+
+            if (ele.next(".help-block").length === 0) {
+                var message_span = "<span class='help-block'>" + message + "</span>";
+                ele.after(message_span);
+                ele.parents("div.form-group").css("margin-bottom", "0px");
+            } else {
+                ele.next(".help-block").html(message);
+            }
+        }
+
+        function showValidationCheckbox(ele, type, message) {
+
+            var checkbox_parent = ele.closest(".form-group").find("label").next("div");
+            console.log(checkbox_parent);
+            checkbox_parent.addClass("has-" + type);
+
+            if (checkbox_parent.find(".help-block").length === 0) {
+                var message_span = "<span class='help-block'>" + message + "</span>";
+                checkbox_parent.append(message_span);
+            } else {
+                checkbox_parent.find(".help-block").html(message);
+            }
+        }
+
+        function removeValidation(ele, type) {
+            ele.closest(".form-group").removeClass("has-" + type);
+            ele.next(".help-block").remove();
+            ele.parents("div.form-group").css("margin-bottom", "35px");
+        }
+
+        function removeValidationCheckbox(ele, type) {
+            ele.closest(".form-group").find("label").next("div").removeClass("has-" + type);
+            ele.closest(".form-group").find(".help-block").remove();
+        }
+
+        function isNotEmpty(ele) {
+            switch (ele.attr("type")) {
+                case "text":
+                case "email":
+                case "password":
+                    if (ele.val().length === 0) {
+                        showValidation(ele, "error", ele.closest(".form-group").find("label").text() + " can't be empty");
+                        return false;
+                    } else {
+                        removeValidation(ele, "error");
+                        return true;
+                    }
+                    break;
+                case "checkbox":
+                case "radio":
+                    var name = ele.attr("name");
+                    var total_checked = $("[name=" + name + "]:checked").length;
+
+                    if (total_checked === 0) {
+                        showValidationCheckbox(ele, "error", "Please select " + ele.closest(".form-group").find("label:first").text());
+                        return false;
+                    } else {
+                        removeValidation(ele, "error");
+                        return true;
+                    }
+                    break;
+            }
+
+
+        }
+
+        function isValidLength(ele, length, operation) {
+            switch (operation) {
+                case ">=":
+                    if (ele.val().length < length) {
+                        showValidation(ele, "error", ele.closest(".form-group").find("label").text() + " should be " + operation + " " + length);
+                        return false;
+                    }
+                    break;
+                default :
+                    break;
+            }
+            removeValidation(ele, "error");
+            return true;
+        }
+
+        function clearValidation(form) {
+            form.find("input").each(function (index, ele) {
+                switch ($(ele).attr("type")) {
+                    case "text":
+                    case "email":
+                    case "password":
+                        $(ele).val("");
+                        removeValidation($(ele), "error");
+                        break;
+                    case "checkbox":
+                    case "radio":
+                        $(ele).prop("checked", false);
+                        removeValidationCheckbox($(ele), "error");
+                        break;
+                }
+            });
+        }
+
+    </script>

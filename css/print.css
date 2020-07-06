@@ -1,0 +1,19 @@
+@media screen{    
+}
+
+@media print{
+
+    .no_print, .operations, #table_form .custom_checkbox, i{
+        display: none !important;
+    }
+    
+    @page 
+    {
+        size: A4;
+        margin: 7mm 7mm;
+    }
+
+    footer {
+        page-break-after: always;
+    }
+}

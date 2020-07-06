@@ -1,0 +1,55 @@
+.modal-content{
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.modal-header{
+    border-radius: 6px 6px 0 0;
+    cursor: move;
+}
+
+.modal.primary .modal-header{
+    color: #fff !important;
+    background-color: #337ab7 !important;
+    border-color: #2e6da4 !important;
+}
+
+.modal.success .modal-header{
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+
+.modal.info .modal-header{
+    color: #fff;
+    background-color: #31b0d5;
+    border-color: #269abc;
+}
+
+.modal.warning .modal-header{
+    color: #fff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+
+.modal.danger .modal-header{
+    color: #fff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+}
+
+.modal.deactivated .modal-header{
+    background-color: #999;
+    color:#FFF;
+    border-bottom:1px solid #777;
+}
+
+.modal.destroyed .modal-header{
+    background-color: rgba(0,0,0,0.50);
+    color:#fff;
+}
+
+.modal.harddelete .modal-header{
+    background-color: rgba(0,0,0,0.8);
+    color:#fff;
+}

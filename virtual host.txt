@@ -1,0 +1,23 @@
+C:\xampp\apache\conf\extra\httpd-vhosts.conf
+C:\Windows\System32\drivers\etc\hosts
+
+<VirtualHost digitalcollege.local>
+	ServerAdmin admin@digitalcollege.local
+    DocumentRoot "C:/Users/hitesh/Documents/GoogleDrive/sandbox/digitalcollege"
+    ServerName digitalcollege.local
+    ServerAlias digitalcollege.local
+	
+    <Directory "C:/Users/hitesh/Documents/GoogleDrive/sandbox/digitalcollege">
+        Options Indexes FollowSymLinks MultiViews Includes ExecCGI
+	        AllowOverride All
+            Order Allow,Deny
+            Allow from all
+            Require all granted
+    </Directory>
+	
+	#ErrorLog ${APACHE_LOG_DIR}/error.log
+    #CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    #ErrorDocument 404 /custom_404.html
+	
+</VirtualHost>

@@ -1,0 +1,13 @@
+.mt_20{
+    margin-top: 20px;   
+}
+video{
+    width: 100%;
+}
+.list-group span{
+    float: right;
+    margin-top:8px;
+}
+h1{
+    text-transform: capitalize;
+}
